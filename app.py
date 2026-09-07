@@ -45,8 +45,10 @@ if not GROQ_API_KEY:
 # LLM CONFIGURATION
 # ============================================================
 
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+
 llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
+    model=GROQ_MODEL,
     temperature=0.2,
     groq_api_key=GROQ_API_KEY
 )
@@ -120,6 +122,7 @@ class TravelState(TypedDict, total=False):
     # Basic information
 
     destination: str
+    user_location: str
     days: int
     travelers: int
     budget: float
@@ -248,6 +251,9 @@ Create a structured traveler profile.
 Destination:
 {state['destination']}
 
+User location:
+{state['user_location']}
+
 Travelers:
 {state['travelers']}
 
@@ -265,6 +271,9 @@ Transport Preference:
 
 Accessibility:
 {state['accessibility']}
+
+Starting location:
+{state['user_location']}
 
 Group Preferences:
 {state['group_preferences']}
@@ -1956,7 +1965,7 @@ def provenance_agent(state):
             datetime.now().isoformat(),
 
         "model":
-            "Llama 3.3 70B via Groq",
+            f"{GROQ_MODEL} via Groq",
 
         "orchestration":
             "LangGraph",
@@ -2497,7 +2506,7 @@ st.markdown(
 
 st.caption(
     "Phase 1 + Phase 2 + Phase 3 + Phase 4 | "
-    "Llama 3.3 + Groq + LangGraph + Streamlit"
+    "Groq + LangGraph + Streamlit"
 )
 
 st.divider()
@@ -2515,6 +2524,12 @@ st.sidebar.header(
 destination = st.sidebar.text_input(
     "📍 Destination",
     "Hyderabad"
+)
+
+
+user_location = st.sidebar.text_input(
+    "🏠 Your Location",
+    ""
 )
 
 
@@ -2624,6 +2639,9 @@ if generate:
 
         "destination":
             destination,
+
+        "user_location":
+            user_location,
 
         "days":
             int(days),
@@ -3621,6 +3639,7 @@ AUTONOMOUS MULTI-AGENT TRAVEL PLANNER
 ============================================================
 
 Destination: {destination}
+Starting location: {user_location}
 Days: {days}
 Travelers: {travelers}
 Budget: ₹{budget:,.0f}
